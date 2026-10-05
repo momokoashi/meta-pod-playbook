@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Meta Pod Playbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: single reading column (~880px), one section per meeting agenda item, tables scroll inside their own box */
+:root{
+  --bg:#fbf8f1; --surface:#ffffff; --ink:#1f1c19; --muted:#6b645c; --line:#e6dfd2;
+  --pink:#d9668c; --pink-soft:#fbe3ea; --yellow-soft:#fbf0c4; --yellow-line:#e2c35a;
+  --green:#3f7a52; --red:#b4463b;
+  --display:"Fraunces", Georgia, serif;
+  --body:"Hanken Grotesk", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#1a1816; --surface:#24211e; --ink:#f1ece4; --muted:#a89f94; --line:#3a352f;
+  --pink:#f08fb0; --pink-soft:#46262f; --yellow-soft:#3f3720; --yellow-line:#b39433;
+  --green:#7fbf91; --red:#e5837a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1a1816; --surface:#24211e; --ink:#f1ece4; --muted:#a89f94; --line:#3a352f;
+  --pink:#f08fb0; --pink-soft:#46262f; --yellow-soft:#3f3720; --yellow-line:#b39433;
+  --green:#7fbf91; --red:#e5837a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 var(--body);margin:0}
+.wrap{max-width:900px;margin:0 auto;padding-inline:20px;padding-block:40px 80px;display:flex;flex-direction:column;gap:56px}
+h1,h2,h3{font-family:var(--display);font-weight:600;text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(2rem,5vw,2.8rem)}
+h2{font-size:1.6rem}
+h3{font-size:1.1rem}
+p{margin:0}
+.eyebrow{font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+section{display:flex;flex-direction:column;gap:18px}
+.lede{color:var(--muted);max-width:62ch}
+header{display:flex;flex-direction:column;gap:14px}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-size:.8rem;font-weight:600;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
+.chip.pink{background:var(--pink-soft);border-color:transparent}
+.chip.yellow{background:var(--yellow-soft);border-color:var(--yellow-line)}
+.chip.red{color:var(--red)}
+.chip.green{color:var(--green)}
+.pods{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.pod{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.pod .who{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.pod .name{font-family:var(--display);font-size:1.35rem;font-weight:600}
+.pod .lane{font-size:.8rem;font-weight:600;color:var(--pink)}
+.pod ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:.93rem}
+.pod .lbl{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pod.cass{grid-column:1/-1;border-color:var(--pink)}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.92rem;min-width:620px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+tr:last-child td{border-bottom:0}
+td strong{font-weight:600}
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;counter-reset:s}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.step .n{font-family:var(--display);color:var(--pink);font-size:1.3rem}
+.step .t{font-weight:600}
+.step .o{font-size:.85rem;color:var(--muted)}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.rule{border-top:3px solid var(--ink);padding-top:12px;display:flex;flex-direction:column;gap:6px}
+.rule .big{font-family:var(--display);font-size:2rem;font-weight:600;font-variant-numeric:tabular-nums}
+.rule p{font-size:.93rem;color:var(--muted)}
+code{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:.85em;background:var(--yellow-soft);padding:2px 6px;border-radius:4px;white-space:nowrap}
+.names{display:flex;flex-direction:column;gap:8px}
+.names div{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline}
+.names span.k{font-size:.8rem;font-weight:700;color:var(--muted);width:90px;flex-shrink:0}
+figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px}
+figure img{display:block;width:100%;border-radius:6px}
+figcaption{font-size:.85rem;color:var(--muted);padding:10px 4px 2px}
+.callout{background:var(--pink-soft);border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:8px}
+.callout.y{background:var(--yellow-soft)}
+.callout ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.week{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.day{border-left:3px solid var(--yellow-line);padding:4px 0 4px 12px;display:flex;flex-direction:column;gap:4px;font-size:.9rem}
+.day b{font-family:var(--display);font-size:1.05rem}
+.open li{margin-bottom:6px}
+footer{font-size:.8rem;color:var(--muted)}
+</style>
+
+<style>
+.matrix td:not(:first-child),.matrix th:not(:first-child){text-align:center}
+.matrix td:first-child{font-weight:500}
+.yes{color:var(--pink);font-weight:700}
+.dash{color:var(--muted)}
+.sec-n{font-family:var(--display);color:var(--pink);font-size:1rem;margin-right:6px}
+.pod.mini{gap:6px}
+.lane-box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.lane-box .who{font-family:var(--display);font-size:1.25rem;font-weight:600}
+.lane-box ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:.93rem}
+.diagram{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px}
+.diagram svg{display:block;min-width:760px;width:100%;height:auto;font-family:var(--body)}
+.d-head{font-size:11px;font-weight:700;letter-spacing:.12em;fill:var(--muted)}
+.d-box{fill:var(--surface);stroke:var(--ink);stroke-width:1.4}
+.d-test{fill:var(--yellow-soft);stroke:var(--yellow-line);stroke-width:1.4}
+.d-win{fill:var(--pink-soft);stroke:var(--pink);stroke-width:1.4}
+.d-lose{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:4 3}
+.d-cross{fill:var(--pink-soft)}
+.d-line{fill:none;stroke:var(--pink);stroke-width:1.6}
+.d-dash{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:4 3}
+.d-loop{fill:none;stroke:var(--pink);stroke-width:1.4;stroke-dasharray:6 4}
+.d-t{fill:var(--ink);font-size:14px;font-weight:600}
+.d-lp{fill:var(--ink);font-size:17px;font-family:var(--display);font-weight:600}
+.d-s{fill:var(--muted);font-size:11.5px}
+.d-o{fill:var(--pink);font-size:12px;font-weight:600}
+.d-n{fill:var(--pink);font-size:22px;font-family:var(--display)}
+.d-tag{fill:var(--muted);font-size:10px;font-weight:700;letter-spacing:.1em}
+.d-arrow{fill:var(--pink)}
+.d-arrow-ink{fill:var(--ink)}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header>
+  <span class="eyebrow">Hello Nancy · Paid social · Team sync 5 Oct 2026</span>
+  <h1>Meta Pod Playbook</h1>
+  <p class="lede">Five parts: the pods, the upload rules, who uploads what, the pod owner's job, and what slows us down. Everyone up to speed by <strong>Friday 9 Oct</strong>. Until then, everyone helps everyone.</p>
+</header>
+
+<!-- AT A GLANCE -->
+<section>
+  <span class="eyebrow">At a glance</span>
+  <h2>Who does what</h2>
+  <div class="tbl"><table class="matrix">
+    <tr><th>Job</th><th>Pod owner<br>Bea · Ryan · Neil</th><th>Cass</th></tr>
+    <tr><td>Check + upload NER / SUD / ACH ads</td><td class="yes">●</td><td class="dash">–</td></tr>
+    <tr><td>Check + upload all other agencies</td><td>Sets the campaign structure</td><td class="yes">●</td></tr>
+    <tr><td>Optimize daily: kill and scale</td><td class="yes">●</td><td class="dash">–</td></tr>
+    <tr><td>Run the win-and-scale loop</td><td class="yes">●</td><td class="dash">–</td></tr>
+    <tr><td>Winners CBO</td><td class="yes">●</td><td class="dash">–</td></tr>
+    <tr><td>Creative requests</td><td>Asks</td><td class="yes">● collects + briefs</td></tr>
+    <tr><td>Talking to agencies and creators</td><td class="dash">–</td><td class="yes">●</td></tr>
+    <tr><td>Creative report</td><td class="dash">–</td><td class="yes">●</td></tr>
+  </table></div>
+  <p class="lede" style="font-size:.9rem">In one line: <strong>pod owners own performance, Cass owns the creative pipeline.</strong></p>
+</section>
+
+<!-- 1 PODS -->
+<section>
+  <span class="eyebrow"><span class="sec-n">1</span>Pods</span>
+  <h2>How we split</h2>
+  <div class="pods">
+    <div class="pod mini"><div class="who"><span class="name">Bea</span><span class="lane">Meta · English · Lem</span></div></div>
+    <div class="pod mini"><div class="who"><span class="name">Ryan</span><span class="lane">Meta · English · Non-Lem</span></div><p style="font-size:.88rem;color:var(--muted)">Avo + everything else in English. This lane will widen.</p></div>
+    <div class="pod mini"><div class="who"><span class="name">Neil</span><span class="lane">Meta · Non-English</span></div><p style="font-size:.88rem;color:var(--muted)">Localization, every product.</p></div>
+    <div class="pod mini"><div class="who"><span class="name">Cass</span><span class="lane">Creative testing + reporting</span></div><p style="font-size:.88rem;color:var(--muted)">Works across all three Meta pods.</p></div>
+    <div class="pod mini"><div class="who"><span class="name">Jeanine</span><span class="lane">Non-Meta</span></div><p style="font-size:.88rem;color:var(--muted)">Taboola, Snap, Reddit, Google and the rest.</p></div>
+  </div>
+  <p class="lede" style="font-size:.9rem">Agencies send mixed products, so one batch gets split across pods: Lem English goes to Bea, other English to Ryan, non-English to Neil.</p>
+</section>
+
+<!-- 2 UPLOAD RULES -->
+<section>
+  <span class="eyebrow"><span class="sec-n">2</span>Upload rules</span>
+  <h2>The rules of uploading</h2>
+  <div class="rules">
+    <div class="rule"><span class="big">24h</span><h3>Live within 24 hours</h3><p>Every delivered ad is live within 24 hours. Nothing gets missed.</p></div>
+    <div class="rule"><span class="big">≤10</span><h3>Ads per ad set</h3><p>10 is the standard, 15 only in the worst case. Over 10, start a second ad set.</p></div>
+    <div class="rule"><span class="big">1 LP</span><h3>Ad matches its LP</h3><p>One landing page per ad set, and every ad in it was made for that page.</p></div>
+  </div>
+</section>
+
+<!-- 3 WHO UPLOADS -->
+<section>
+  <span class="eyebrow"><span class="sec-n">3</span>Who uploads what</span>
+  <h2>Two lanes, never shared</h2>
+  <div class="two">
+    <div class="lane-box">
+      <span class="who">Pod owner</span>
+      <span class="eyebrow">NER · SUD · ACH</span>
+      <ul>
+        <li>Checks the ads: right product, right LP, specs OK</li>
+        <li>Uploads into their own test campaigns</li>
+        <li>Bea takes the Lem ads, Ryan the non-Lem</li>
+      </ul>
+    </div>
+    <div class="lane-box">
+      <span class="who">Cass</span>
+      <span class="eyebrow">Every other agency</span>
+      <ul>
+        <li>Haseeb / Shabir editors · Heavecorp · Eyeball · Attentional · IG posts / whitelisting · Evrim (trial) · Krave (ends 31 Oct)</li>
+        <li>Checks the ads, splits each batch by product and language</li>
+        <li>Uploads into the pod owner's campaigns, using the structure Bea, Ryan or Neil set up</li>
+      </ul>
+    </div>
+  </div>
+  <p class="lede" style="font-size:.9rem"><strong>Pod owner sets the structure, Cass fills it.</strong> Each pod owner keeps a test campaign ready for every agency that sends them ads. Cass adds ad sets to it and never has to ask where an ad goes.</p>
+</section>
+
+<!-- 4 POD OWNER -->
+<section>
+  <span class="eyebrow"><span class="sec-n">4</span>Pod owner's job</span>
+  <h2>Optimize every day, run the loop</h2>
+  <div class="tbl"><table>
+    <tr><th>Testing campaign</th><th>Rule</th></tr>
+    <tr><td><strong>Type</strong></td><td>ABO</td></tr>
+    <tr><td><strong>Budget</strong></td><td>$500/day per ad set. $1,000/day for a new angle we feel strongly about</td></tr>
+    <tr><td><strong>Attribution</strong></td><td>7-day click</td></tr>
+    <tr><td><strong>Campaigns</strong></td><td>One per product × language × agency</td></tr>
+    <tr><td><strong>Day 3–4</strong></td><td>Clearly bad → kill. Otherwise keep watching</td></tr>
+    <tr><td><strong>Day 7</strong></td><td>Call it. Losers off for good, winners into the loop</td></tr>
+    <tr><td><strong>Thresholds</strong></td><td><span class="chip red">TBC · Momo</span> Until then, the pod owner makes the call and Momo signs off</td></tr>
+  </table></div>
+
+  <h3>The win-and-scale loop</h3>
+  <div class="diagram">
+    <svg viewBox="0 0 960 560" role="img" aria-label="Win-and-scale loop. Website and Pre-lander each have a testing lane, uploaded by Cass (NER, SUD, ACH by the pod owner) and optimized daily by the pod owner. Winners go to a five-step playbook: 1 scale budget in the winners CBO, 2 variations requested from Cass, 3 run the winner on the other LP, 4 tweak for the other LP requested from Cass, 5 brief Rahul for a new LP. Steps 3 to 5 loop back into testing.">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="d-arrow"/></marker>
+        <marker id="ahk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="d-arrow-ink"/></marker>
+      </defs>
+
+      <text x="75" y="40" text-anchor="middle" class="d-head">LANDING PAGE</text>
+      <text x="375" y="40" text-anchor="middle" class="d-head">ADS</text>
+      <text x="775" y="40" text-anchor="middle" class="d-head">WINNER PLAYBOOK</text>
+
+      <!-- Website lane -->
+      <rect x="10" y="102" width="130" height="50" rx="6" class="d-box"/>
+      <text x="75" y="133" text-anchor="middle" class="d-lp">Website</text>
+      <text x="170" y="118" text-anchor="middle" class="d-s">new ads</text>
+      <path d="M140,127 L198,127" class="d-line" style="stroke:var(--ink)" marker-end="url(#ahk)"/>
+      <rect x="200" y="95" width="150" height="64" rx="6" class="d-test"/>
+      <text x="275" y="122" text-anchor="middle" class="d-t">TESTING</text>
+      <text x="275" y="142" text-anchor="middle" class="d-o">Pod owner · daily</text>
+      <text x="275" y="178" text-anchor="middle" class="d-s">uploaded by Cass*</text>
+      <path d="M350,127 C375,127 375,98 398,98" class="d-line" marker-end="url(#ah)"/>
+      <path d="M350,127 C375,127 375,156 398,156" class="d-dash"/>
+      <rect x="400" y="82" width="150" height="32" rx="6" class="d-win"/>
+      <text x="475" y="103" text-anchor="middle" class="d-t">WINNER · day 7</text>
+      <rect x="400" y="140" width="150" height="32" rx="6" class="d-lose"/>
+      <text x="475" y="161" text-anchor="middle" class="d-s">LOSER · off for good</text>
+
+      <!-- Pre-lander lane -->
+      <rect x="10" y="297" width="130" height="50" rx="6" class="d-box"/>
+      <text x="75" y="328" text-anchor="middle" class="d-lp">Pre-lander</text>
+      <text x="170" y="313" text-anchor="middle" class="d-s">new ads</text>
+      <path d="M140,322 L198,322" class="d-line" style="stroke:var(--ink)" marker-end="url(#ahk)"/>
+      <rect x="200" y="290" width="150" height="64" rx="6" class="d-test"/>
+      <text x="275" y="317" text-anchor="middle" class="d-t">TESTING</text>
+      <text x="275" y="337" text-anchor="middle" class="d-o">Pod owner · daily</text>
+      <text x="275" y="373" text-anchor="middle" class="d-s">uploaded by Cass*</text>
+      <path d="M350,322 C375,322 375,293 398,293" class="d-line" marker-end="url(#ah)"/>
+      <path d="M350,322 C375,322 375,351 398,351" class="d-dash"/>
+      <rect x="400" y="277" width="150" height="32" rx="6" class="d-win"/>
+      <text x="475" y="298" text-anchor="middle" class="d-t">WINNER · day 7</text>
+      <rect x="400" y="335" width="150" height="32" rx="6" class="d-lose"/>
+      <text x="475" y="356" text-anchor="middle" class="d-s">LOSER · off for good</text>
+
+      <!-- winners into playbook -->
+      <path d="M550,98 C585,98 570,225 598,225" class="d-line" marker-end="url(#ah)"/>
+      <path d="M550,293 C585,293 570,225 598,225" class="d-line" marker-end="url(#ah)"/>
+
+      <!-- Playbook -->
+      <rect x="600" y="192" width="350" height="198" class="d-cross"/>
+      <rect x="600" y="60" width="350" height="330" rx="6" fill="none" style="stroke:var(--ink);stroke-width:1.4"/>
+      <line x1="600" y1="126" x2="950" y2="126" style="stroke:var(--line)"/>
+      <line x1="600" y1="192" x2="950" y2="192" style="stroke:var(--line)"/>
+      <line x1="600" y1="258" x2="950" y2="258" style="stroke:var(--line)"/>
+      <line x1="600" y1="324" x2="950" y2="324" style="stroke:var(--line)"/>
+      <text x="940" y="76" text-anchor="end" class="d-tag">SAME LP</text>
+      <text x="940" y="208" text-anchor="end" class="d-tag">CROSS LP</text>
+
+      <text x="620" y="98" class="d-n">1</text>
+      <text x="648" y="82" class="d-t">Scale budget</text>
+      <text x="648" y="99" class="d-s">Same ad, same LP, more spend</text>
+      <text x="648" y="116" class="d-o">Pod owner → winners CBO</text>
+
+      <text x="620" y="164" class="d-n">2</text>
+      <text x="648" y="148" class="d-t">Winner variations</text>
+      <text x="648" y="165" class="d-s">New hook / visual / copy</text>
+      <text x="648" y="182" class="d-o">Pod owner → request to Cass</text>
+
+      <text x="620" y="230" class="d-n">3</text>
+      <text x="648" y="214" class="d-t">Winning ad → other LP</text>
+      <text x="648" y="231" class="d-s">Run as-is if the LP fits</text>
+      <text x="648" y="248" class="d-o">Pod owner launches it</text>
+
+      <text x="620" y="296" class="d-n">4</text>
+      <text x="648" y="280" class="d-t">Tweak winner for other LP</text>
+      <text x="648" y="297" class="d-s">Adjust the angle to match that LP</text>
+      <text x="648" y="314" class="d-o">Pod owner → request to Cass</text>
+
+      <text x="620" y="362" class="d-n">5</text>
+      <text x="648" y="346" class="d-t">New LP built on the winner</text>
+      <text x="648" y="363" class="d-s">The winner's angle becomes the page</text>
+      <text x="648" y="380" class="d-o">Pod owner → brief Rahul</text>
+
+      <!-- loop back -->
+      <path d="M775,390 L775,460 L75,460 L75,349" class="d-loop" marker-end="url(#ah)"/>
+      <text x="425" y="482" text-anchor="middle" class="d-o">Steps 3–5 are new tests: back into testing on the other LP, or on a new LP</text>
+
+      <text x="10" y="530" class="d-s">* NER / SUD / ACH: the pod owner uploads.   English winners also go to Neil to localize.</text>
+    </svg>
+  </div>
+
+  <h3>Winners CBO</h3>
+  <div class="callout">
+    <ul>
+      <li><strong>One campaign per pod:</strong> Lem EN (Bea), Non-Lem EN (Ryan), Non-EN (Neil).</li>
+      <li><strong>New ad set every week</strong> for that week's winners.</li>
+      <li><strong>Reuse the post ID</strong> of the winning test ad so likes and comments carry over.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 5 BLOCKERS -->
+<section>
+  <span class="eyebrow"><span class="sec-n">5</span>Blockers</span>
+  <h2>What stops us going faster?</h2>
+  <p class="lede">How much the loop produces = ads tested per week × hit rate × how fast a winner gets scaled. Every manual step on the way slows one of those down. These are the slow spots and what could take them away, in the order an ad hits them.</p>
+  <div class="tbl"><table>
+    <tr><th>Blocker</th><th>Why it slows us</th><th>What could remove it</th></tr>
+    <tr><td><strong>1 · Ads upload</strong></td><td>Every ad is built by hand, so volume is capped by people's hours</td><td>Bulk upload from a labelled folder through the Meta API, with names filled in automatically</td></tr>
+    <tr><td><strong>2 · Segmenting ads</strong></td><td>Mixed batches have to be sorted by product, language and LP before anything goes live</td><td>Agencies label files on delivery. AI tags whatever arrives unlabelled</td></tr>
+    <tr><td><strong>3 · Checking ads</strong></td><td>Product, claims, policy and LP fit are checked by eye. Rejections cost days</td><td>An AI pre-check before upload (we already have a creative QC agent)</td></tr>
+    <tr><td><strong>4 · Calling winners</strong></td><td>No set thresholds, so every call waits on a person reading dashboards</td><td>Momo sets the thresholds, then a daily automatic list of kill / watch / winner per pod</td></tr>
+    <tr><td><strong>5 · Variations</strong></td><td>Steps 2 and 4 wait days on an agency round-trip</td><td>Make the first variations in-house with AI (hooks, copy, statics) and keep agencies for new concepts</td></tr>
+    <tr><td><strong>6 · Localization</strong></td><td>Every English winner has to be translated and re-cut by hand</td><td>AI translation and dubbing, with Neil checking the result</td></tr>
+    <tr><td><strong>7 · New LPs</strong></td><td>Step 5 is one person's build time</td><td>Pre-lander templates that AI fills from the winning angle, with Rahul reviewing</td></tr>
+    <tr><td><strong>8 · Creative report</strong></td><td>Put together by hand every week</td><td>Built automatically from consistent ad names</td></tr>
+  </table></div>
+  <p class="lede" style="font-size:.9rem"><strong>Measure before fixing:</strong> hours from delivery to live, ads tested per week per pod, and days from launch to call. The step with the worst number is the one to fix first. Question for the team: <strong>what else slows you down day to day?</strong></p>
+</section>
+
+<!-- OPEN -->
+<section>
+  <span class="eyebrow">Still open</span>
+  <ul class="open">
+    <li><strong>Optimization rules:</strong> winner and kill thresholds (Momo).</li>
+    <li><strong>NER / SUD / ACH briefs:</strong> Cass, like every other agency, or the pod owner who uploads them?</li>
+    <li><strong>Neil:</strong> does he test new non-English creatives directly, or only localize English winners?</li>
+    <li><strong>Evrim:</strong> how many batches before we decide.</li>
+  </ul>
+</section>
+
+<footer>v4 · 5 Oct 2026 · team sync</footer>
+</div>
+</body>
+</html>
